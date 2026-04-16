@@ -391,7 +391,7 @@ with tab1:
         'Difficulty_Level': 'Difficulty'
     })
     
-    st.dataframe(display_df, use_container_width=True, height=400)
+    st.dataframe(display_df, width='stretch', height=400)
     
     st.markdown("")
     
@@ -430,7 +430,7 @@ with tab1:
             font=dict(size=11)
         )
         
-        st.plotly_chart(fig_reduction, use_container_width=True)
+        st.plotly_chart(fig_reduction, width='stretch')
     
     with col2:
         st.markdown("#### ✅ Success Rate Distribution")
@@ -465,7 +465,7 @@ with tab1:
             font=dict(size=11)
         )
         
-        st.plotly_chart(fig_success, use_container_width=True)
+        st.plotly_chart(fig_success, width='stretch')
     
     st.markdown("")
     
@@ -492,7 +492,7 @@ with tab1:
             height=400
         )
         
-        st.plotly_chart(fig_category, use_container_width=True)
+        st.plotly_chart(fig_category, width='stretch')
     
     with col2:
         difficulty_counts = df_filtered['Difficulty_Level'].value_counts()
@@ -516,7 +516,7 @@ with tab1:
             height=400
         )
         
-        st.plotly_chart(fig_difficulty, use_container_width=True)
+        st.plotly_chart(fig_difficulty, width='stretch')
 
 # ========================================
 # TAB 2: DETAILED ANALYSIS
@@ -646,7 +646,7 @@ with tab2:
             margin=dict(t=20, b=20, l=20, r=20)
         )
         
-        st.plotly_chart(fig_roi, use_container_width=True)
+        st.plotly_chart(fig_roi, width='stretch')
     
     st.markdown("---")
     
@@ -696,7 +696,7 @@ with tab2:
         showlegend=False
     )
     
-    st.plotly_chart(fig_impact, use_container_width=True)
+    st.plotly_chart(fig_impact, width='stretch')
 
 # ========================================
 # TAB 3: COST VS IMPACT
@@ -756,7 +756,7 @@ with tab3:
         hovermode='closest'
     )
     
-    st.plotly_chart(fig_scatter, use_container_width=True)
+    st.plotly_chart(fig_scatter, width='stretch')
     
     st.markdown("---")
     
@@ -796,7 +796,7 @@ with tab3:
             margin=dict(b=100)
         )
         
-        st.plotly_chart(fig_roi_compare, use_container_width=True)
+        st.plotly_chart(fig_roi_compare, width='stretch')
     
     with col2:
         st.markdown("#### 📅 Implementation Timeline")
@@ -831,7 +831,7 @@ with tab3:
             margin=dict(b=100)
         )
         
-        st.plotly_chart(fig_timeline, use_container_width=True)
+        st.plotly_chart(fig_timeline, width='stretch')
     
     st.markdown("---")
     
@@ -858,7 +858,7 @@ with tab3:
                 'Avg Cost ($)': '${:,.0f}',
                 'Success Rate (%)': '{:.0f}'
             }).background_gradient(subset=['Avg Reduction (%)'], cmap='Greens'),
-            use_container_width=True
+            width='stretch'
         )
         
         st.success(f"✅ **{len(quick_wins_df)} Quick Win(s) Available** - These measures offer immediate to 1-year ROI, perfect for building momentum!")
@@ -892,7 +892,7 @@ with tab3:
                 'Avg ROI (years)': '{:.1f}',
                 'Success Rate (%)': '{:.0f}'
             }).background_gradient(subset=['Avg Reduction (%)'], cmap='RdYlGn'),
-            use_container_width=True
+            width='stretch'
         )
         
         st.success(f"💎 **{len(best_value_df)} High-Value Measure(s)** - Combining significant impact (≥40% reduction) with reasonable ROI (≤3 years)")
@@ -1138,7 +1138,7 @@ with tab5:
                     'ROI (years)': '{:.1f}',
                     'Success Rate (%)': '{:.0f}'
                 }).background_gradient(subset=['Reduction (%)'], cmap='Greens'),
-                use_container_width=True
+                width='stretch'
             )
             
             total_reduction = budget_measures['Avg_Reduction'].sum()
