@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Footprint Reduction - Research Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="description" content="Evidence-Based Carbon Footprint Reduction Measures for Tech Companies - Interactive Dashboard">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Carbon Dashboard">
+    
+    <!-- PWA Links -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%2310b981' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🌱</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Merriweather:wght@400;700;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            font-family: 'DM Sans', sans-serif;
+        }
+        h1, h2, h3, .heading {
+            font-family: 'Merriweather', serif;
+        }
+        .display-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        :root {
+            --bg-primary: #fafaf8;
+            --bg-card: #ffffff;
+            --bg-dark: #1a1a1a;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5c5c5c;
+            --accent-green: #2d6a4f;
+            --accent-green-light: #40916c;
+            --accent-emerald: #059669;
+            --accent-coral: #e07a5f;
+            --accent-gold: #d4a574;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        /* Hero Gradient Animation */
+        .hero-gradient {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 50%, #1a1a1a 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        /* Pulse Glow */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(45, 106, 79, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(45, 106, 79, 0.6); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        
+        /* Fade In Up */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        
+        /* Card Hover */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        /* Stats Counter */
+        .stat-number {
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Scroll Indicator */
+        @keyframes scrollDown {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(10px); opacity: 0.5; }
+        }
+        .scroll-indicator {
+            animation: scrollDown 2s ease-in-out infinite;
+        }
+        
+        /* Section Divider */
+        .section-divider {
+            background: linear-gradient(90deg, transparent, #2d6a4f, transparent);
+            height: 1px;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d6a4f;
+            border-radius: 4px;
+        }
+        
+        /* Measure Card */
+        .measure-card {
+            border-left: 4px solid #2d6a4f;
+            transition: all 0.3s ease;
+        }
+        .measure-card:hover {
+            border-left-color: #e07a5f;
+            background: #fafaf8;
+        }
+        
+        /* CTA Button */
+        .cta-button {
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(45, 106, 79, 0.4);
+        }
+        
+        /* Pattern Overlay */
+        .pattern-overlay {
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center">
+                        <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">Carbon Research</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="#abstract" class="text-gray-600 hover:text-emerald-700 transition-colors font-medium">Abstract</a>
+                    <a href="#methodology" class="text-gray-600 hover:text-emerald-700 transition-colors font-medium">Methodology</a>
+                    <a href="#measures" class="text-gray-600 hover:text-emerald-700 transition-colors font-medium">Measures</a>
+                    <a href="#analysis" class="text-gray-600 hover:text-emerald-700 transition-colors font-medium">Analysis</a>
+                    <a href="#glossary" class="text-gray-600 hover:text-emerald-700 transition-colors font-medium">Glossary</a>
+                    <a href="#team" class="text-gray-600 hover:text-emerald-700 transition-colors font-medium">Team</a>
+                    <a href="dashboard.html" class="cta-button px-5 py-2.5 text-white rounded-lg font-semibold flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        Open Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+        <div class="pattern-overlay absolute inset-0"></div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-32 left-20 w-20 h-20 rounded-full bg-emerald-500/10 blur-xl float-animation"></div>
+        <div class="absolute top-48 right-32 w-32 h-32 rounded-full bg-emerald-400/10 blur-xl float-animation" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-40 left-40 w-24 h-24 rounded-full bg-emerald-300/10 blur-xl float-animation" style="animation-delay: 2s;"></div>
+        
+        <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+            <div class="fade-in-up">
+                <span class="inline-block px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium mb-6 border border-emerald-500/30">
+                    Evidence-Based Research Framework
+                </span>
+            </div>
+            
+            <h1 class="display-font text-5xl md:text-7xl font-bold text-white mb-6 fade-in-up delay-1 leading-tight">
+                Carbon Footprint Reduction
+                <span class="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-300">for Tech Companies</span>
+            </h1>
+            
+            <p class="text-xl text-gray-300 mb-10 max-w-3xl mx-auto fade-in-up delay-2 leading-relaxed">
+                A Comprehensive Study with Interactive Dashboard — Bridging the gap between theoretical sustainability frameworks and practical implementation through data-driven insights.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 fade-in-up delay-3">
+                <a href="dashboard.html" class="cta-button px-8 py-4 text-white rounded-xl font-semibold text-lg flex items-center gap-3 pulse-glow">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Explore Interactive Dashboard
+                </a>
+                <a href="#abstract" class="px-8 py-4 text-white/80 hover:text-white border border-white/20 rounded-xl font-medium transition-all hover:bg-white/5">
+                    Read the Research
+                </a>
+            </div>
+            
+            <!-- Stats Preview -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 fade-in-up delay-4">
+                <div class="text-center">
+                    <div class="stat-number text-4xl md:text-5xl font-bold">10</div>
+                    <div class="text-gray-400 text-sm mt-1">Proven Measures</div>
+                </div>
+                <div class="text-center">
+                    <div class="stat-number text-4xl md:text-5xl font-bold">25+</div>
+                    <div class="text-gray-400 text-sm mt-1">Case Studies</div>
+                </div>
+                <div class="text-center">
+                    <div class="stat-number text-4xl md:text-5xl font-bold">85%</div>
+                    <div class="text-gray-400 text-sm mt-1">Avg Success Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="stat-number text-4xl md:text-5xl font-bold">90%</div>
+                    <div class="text-gray-400 text-sm mt-1">Max Reduction</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-indicator">
+            <i data-lucide="chevron-down" class="w-8 h-8 text-white/50"></i>
+        </div>
+    </section>
+
+    <!-- Abstract Section -->
+    <section id="abstract" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Overview</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">Abstract</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        This study presents a comprehensive analysis of carbon footprint reduction measures specifically designed for technology companies. Through systematic research and evidence-based evaluation, <strong class="text-emerald-700">ten proven measures</strong> have been identified and validated using real-world case studies from leading tech organizations.
+                    </p>
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        The research combines quantitative analysis of carbon reduction potential, implementation costs, return on investment, and success rates to provide actionable insights for organizations seeking to reduce their environmental impact.
+                    </p>
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        An interactive dashboard has been developed to facilitate measure selection and implementation planning based on organizational constraints and priorities.
+                    </p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-8 border border-emerald-100">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
+                            <i data-lucide="target" class="w-5 h-5 text-white"></i>
+                        </div>
+                        Key Findings
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700">Tech companies can achieve <strong>20-100% carbon reductions</strong> across operational areas</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700">ROI periods vary from <strong>immediate returns to 8 years</strong></span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700">Small startups can achieve <strong>40-60% reduction</strong> with minimal investment</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700">Large enterprises can leverage all measures for <strong>70-90% total reduction</strong></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <section class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Background</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">Introduction</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl p-8 md:p-12 shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">1.1 Background and Context</h3>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        The global technology sector has emerged as a significant contributor to greenhouse gas emissions, accounting for approximately <strong class="text-emerald-700">2-3% of global carbon emissions</strong>. This footprint is comparable to the aviation industry.
+                    </p>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        The carbon footprint of technology companies encompasses multiple emission sources:
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-4 mb-8">
+                        <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-100">
+                            <div class="text-3xl font-bold text-emerald-700 mb-2">40%</div>
+                            <p class="text-gray-700 text-sm">Data centers & cloud infrastructure</p>
+                        </div>
+                        <div class="bg-amber-50 rounded-xl p-5 border border-amber-100">
+                            <div class="text-3xl font-bold text-amber-700 mb-2">35%</div>
+                            <p class="text-gray-700 text-sm">Manufacturing & supply chain</p>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
+                            <div class="text-3xl font-bold text-blue-700 mb-2">15%</div>
+                            <p class="text-gray-700 text-sm">Business operations & travel</p>
+                        </div>
+                        <div class="bg-purple-50 rounded-xl p-5 border border-purple-100">
+                            <div class="text-3xl font-bold text-purple-700 mb-2">10%</div>
+                            <p class="text-gray-700 text-sm">E-waste management</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6 mt-10">1.2 Problem Statement</h3>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        Despite growing awareness and commitment to sustainability, technology companies face significant challenges in implementing effective carbon reduction strategies:
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="info" class="w-5 h-5 text-red-600"></i>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Information Overload</strong>
+                                <p class="text-gray-600 text-sm mt-1">Numerous potential measures exist, making prioritization difficult without clear guidance.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="file-x" class="w-5 h-5 text-orange-600"></i>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Lack of Validated Data</strong>
+                                <p class="text-gray-600 text-sm mt-1">Many proposed solutions lack real-world validation and quantified impact metrics.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="calculator" class="w-5 h-5 text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Cost-Benefit Uncertainty</strong>
+                                <p class="text-gray-600 text-sm mt-1">Organizations struggle to evaluate financial implications and return on investment.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="puzzle" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Implementation Complexity</strong>
+                                <p class="text-gray-600 text-sm mt-1">Limited guidance exists for practical implementation tailored to different contexts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methodology Section -->
+    <section id="methodology" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Research Process</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">Methodology</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-5xl mx-auto">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                    <div class="bg-emerald-50 rounded-2xl p-6 border border-emerald-100 card-hover">
+                        <div class="w-14 h-14 rounded-xl bg-emerald-600 flex items-center justify-center mb-4">
+                            <span class="text-white font-bold text-2xl">1</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Measure Identification</h3>
+                        <p class="text-gray-600 text-sm">Systematic review of 150+ academic papers, 25+ industry reports, and sustainability frameworks.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100 card-hover">
+                        <div class="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center mb-4">
+                            <span class="text-white font-bold text-2xl">2</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Case Study Research</h3>
+                        <p class="text-gray-600 text-sm">In-depth analysis of 25+ documented implementations from leading tech companies.</p>
+                    </div>
+                    
+                    <div class="bg-purple-50 rounded-2xl p-6 border border-purple-100 card-hover">
+                        <div class="w-14 h-14 rounded-xl bg-purple-600 flex items-center justify-center mb-4">
+                            <span class="text-white font-bold text-2xl">3</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Data Validation</h3>
+                        <p class="text-gray-600 text-sm">Cross-referencing multiple sources and verifying claims through official disclosures.</p>
+                    </div>
+                    
+                    <div class="bg-orange-50 rounded-2xl p-6 border border-orange-100 card-hover">
+                        <div class="w-14 h-14 rounded-xl bg-orange-600 flex items-center justify-center mb-4">
+                            <span class="text-white font-bold text-2xl">4</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Framework Development</h3>
+                        <p class="text-gray-600 text-sm">Creating interactive dashboard and implementation roadmaps for practical application.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 text-white">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                        <i data-lucide="filter" class="w-6 h-6 text-emerald-400"></i>
+                        Selection Criteria for Final Measures
+                    </h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400 mt-0.5"></i>
+                            <span class="text-gray-300 text-sm">Minimum 3 documented case studies with quantified results</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400 mt-0.5"></i>
+                            <span class="text-gray-300 text-sm">Relevance to multiple tech company segments</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400 mt-0.5"></i>
+                            <span class="text-gray-300 text-sm">Demonstrated carbon reduction of at least 20%</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400 mt-0.5"></i>
+                            <span class="text-gray-300 text-sm">Practical implementation without major business model changes</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400 mt-0.5"></i>
+                            <span class="text-gray-300 text-sm">Complete data on costs, ROI, timeline, and success rates</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400 mt-0.5"></i>
+                            <span class="text-gray-300 text-sm">Balanced coverage across operational areas and company sizes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Measures Section -->
+    <section id="measures" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Validated Solutions</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">10 Evidence-Based Measures</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <!-- Infrastructure -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <i data-lucide="server" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    Infrastructure
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-900">Cloud Migration & Optimization</h4>
+                            <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Medium</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Moving from on-premise servers to cloud providers with renewable energy commitments.</p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">30-88% Reduction</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">1-3 yr ROI</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">All Sizes</span>
+                        </div>
+                    </div>
+                    <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-900">Data Center Cooling Optimization</h4>
+                            <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">High</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">AI/ML-based cooling optimization, hot/cold aisle containment, free air cooling.</p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">30-50% Reduction</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">2-4 yr ROI</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">Medium-Large</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Operations -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="building" class="w-5 h-5 text-blue-700"></i>
+                    </div>
+                    Operations
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-900">Remote Work Policy</h4>
+                            <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Low</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Implementing permanent remote/hybrid work to eliminate commuting emissions.</p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">40-70% Reduction</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">Immediate</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">All Sizes</span>
+                        </div>
+                    </div>
+                    <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-900">Smart Office Energy Management</h4>
+                            <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Medium</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">IoT sensors, smart LED lighting, HVAC automation, occupancy-based controls.</p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">25-45% Reduction</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">1-3 yr ROI</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">All Sizes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Energy & Hardware -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                        <i data-lucide="zap" class="w-5 h-5 text-yellow-700"></i>
+                    </div>
+                    Energy & Hardware
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-900">Renewable Energy Procurement</h4>
+                            <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">High</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Purchasing renewable energy through PPAs or RECs for operations.</p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">50-100% Reduction</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">3-7 yr ROI</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">Medium-Large</span>
+                        </div>
+                    </div>
+                    <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex items-start justify-between mb-4">
+                            <h4 class="text-lg font-bold text-gray-900">Device Lifecycle Management</h4>
+                            <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Low</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Extending device lifespan, refurbishment programs, responsible e-waste recycling.</p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">20-40% Reduction</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">Immediate</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">All Sizes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Development, Supply Chain & Transport -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                    <div class="flex items-start justify-between mb-4">
+                        <h4 class="text-lg font-bold text-gray-900">Sustainable Software</h4>
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Medium</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">Optimizing code efficiency, efficient algorithms, green hosting.</p>
+                    <div class="flex flex-wrap gap-3 text-sm">
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">20-50%</span>
+                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">0.5-1 yr</span>
+                    </div>
+                </div>
+                <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                    <div class="flex items-start justify-between mb-4">
+                        <h4 class="text-lg font-bold text-gray-900">Green Procurement</h4>
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Medium</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">Requiring suppliers to meet carbon standards, low-carbon vendors.</p>
+                    <div class="flex flex-wrap gap-3 text-sm">
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">10-30%</span>
+                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">3-5 yr</span>
+                    </div>
+                </div>
+                <div class="measure-card bg-white rounded-xl p-6 shadow-md">
+                    <div class="flex items-start justify-between mb-4">
+                        <h4 class="text-lg font-bold text-gray-900">EV Fleet Transition</h4>
+                        <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">High</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">Transitioning company vehicles from gasoline/diesel to electric.</p>
+                    <div class="flex flex-wrap gap-3 text-sm">
+                        <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded">50-70%</span>
+                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded">5-8 yr</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Section -->
+    <section id="analysis" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Data Insights</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">Comparative Analysis</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- Carbon Reduction Comparison -->
+                <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-8 border border-emerald-100">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Carbon Reduction Potential</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <span class="w-32 text-sm text-gray-600 text-right">Renewable Energy</span>
+                            <div class="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full" style="width: 75%"></div>
+                            </div>
+                            <span class="w-16 text-sm font-medium text-emerald-700">75%</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="w-32 text-sm text-gray-600 text-right">EV Fleet</span>
+                            <div class="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <span class="w-16 text-sm font-medium text-emerald-700">60%</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="w-32 text-sm text-gray-600 text-right">Video Conferencing</span>
+                            <div class="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <span class="w-16 text-sm font-medium text-emerald-700">60%</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="w-32 text-sm text-gray-600 text-right">Cloud Migration</span>
+                            <div class="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-emerald-300 to-emerald-400 rounded-full" style="width: 59%"></div>
+                            </div>
+                            <span class="w-16 text-sm font-medium text-emerald-700">59%</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="w-32 text-sm text-gray-600 text-right">Remote Work</span>
+                            <div class="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-emerald-300 to-emerald-400 rounded-full" style="width: 55%"></div>
+                            </div>
+                            <span class="w-16 text-sm font-medium text-emerald-700">55%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ROI Timeline -->
+                <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Implementation Complexity</h3>
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="text-center p-4 bg-green-100 rounded-xl">
+                            <div class="text-3xl font-bold text-green-700">3</div>
+                            <div class="text-sm text-green-600">Low Complexity</div>
+                        </div>
+                        <div class="text-center p-4 bg-amber-100 rounded-xl">
+                            <div class="text-3xl font-bold text-amber-700">5</div>
+                            <div class="text-sm text-amber-600">Medium</div>
+                        </div>
+                        <div class="text-center p-4 bg-red-100 rounded-xl">
+                            <div class="text-3xl font-bold text-red-700">2</div>
+                            <div class="text-sm text-red-600">High</div>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 mb-3">Quick Wins (ROI ≤ 1 year):</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Remote Work Policy</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Video Conferencing</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Device Lifecycle</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-green-600"></i> Sustainable Software</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Case Studies -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Featured Case Studies</h3>
+                <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div class="bg-white rounded-xl p-5 shadow-md border border-gray-100 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold text-sm">G</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm">Google</h4>
+                        <p class="text-xs text-gray-500 mt-1">100% renewable matching</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border border-gray-100 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold text-sm">M</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm">Microsoft</h4>
+                        <p class="text-xs text-gray-500 mt-1">82% device reuse rate</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border border-gray-100 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold text-sm">A</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm">Amazon</h4>
+                        <p class="text-xs text-gray-500 mt-1">100K EV order</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border border-gray-100 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold text-sm">E</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm">Etsy</h4>
+                        <p class="text-xs text-gray-500 mt-1">50% infrastructure reduction</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-md border border-gray-100 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold text-sm">A</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 text-sm">Apple</h4>
+                        <p class="text-xs text-gray-500 mt-1">213 suppliers enrolled</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Glossary Section -->
+    <section id="glossary" class="py-20 bg-gradient-to-b from-emerald-50 to-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Reference</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">Key Terms Glossary</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                        <h3 class="font-bold text-emerald-700 text-lg mb-3">Carbon Footprint</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">The total greenhouse gas emissions caused directly and indirectly by an organization, expressed as CO₂ equivalent.</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                        <h3 class="font-bold text-emerald-700 text-lg mb-3">Scope 1, 2 & 3 Emissions</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed"><strong>Scope 1:</strong> Direct emissions. <strong>Scope 2:</strong> Indirect from electricity. <strong>Scope 3:</strong> Value chain emissions.</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                        <h3 class="font-bold text-emerald-700 text-lg mb-3">PPA (Power Purchase Agreement)</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">Long-term contract (10-25 years) to purchase electricity from renewable projects.</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                        <h3 class="font-bold text-emerald-700 text-lg mb-3">REC (Renewable Energy Certificate)</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">Market-based instrument representing proof that 1 MWh of electricity was generated from renewable sources.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-emerald-700 font-semibold text-sm uppercase tracking-wider">Behind the Research</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-6 text-gray-900">Research Team</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-gray-100">
+                    <div class="text-center mb-10">
+                        <p class="text-gray-600 text-lg">This comprehensive research was conducted by a dedicated team of researchers committed to advancing sustainability in the technology sector.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+                        <div class="text-center group">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                                <span class="text-white font-bold text-xl">DV</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">Dheeraj Vishwakarma</h4>
+                        </div>
+                        
+                        <div class="text-center group">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                                <span class="text-white font-bold text-xl">KA</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">Keshar Agarwal</h4>
+                        </div>
+                        
+                        <div class="text-center group">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                                <span class="text-white font-bold text-xl">SP</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">Swaradny Pulekar</h4>
+                        </div>
+                        
+                        <div class="text-center group">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                                <span class="text-white font-bold text-xl">YT</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">Yash Tiwari</h4>
+                        </div>
+                        
+                        <div class="text-center group">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-105 transition-transform">
+                                <span class="text-white font-bold text-xl">SS</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-900">Sourajeet Sahoo</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 hero-gradient relative overflow-hidden">
+        <div class="pattern-overlay absolute inset-0"></div>
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <h2 class="display-font text-4xl md:text-5xl font-bold text-white mb-6">Ready to Explore the Data?</h2>
+            <p class="text-xl text-gray-300 mb-10">Access the interactive dashboard to filter measures, analyze case studies, and build your carbon reduction strategy.</p>
+            <a href="dashboard.html" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-700 rounded-xl font-bold text-lg hover:bg-emerald-50 transition-all hover:scale-105 shadow-2xl">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                Open Interactive Dashboard
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center">
+                        <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-lg font-semibold">Carbon Footprint Reduction Research</span>
+                </div>
+                
+                <div class="flex items-center gap-8 text-gray-400 text-sm">
+                    <span>© 2026 All Rights Reserved</span>
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="database" class="w-4 h-4"></i>
+                        75+ Sources Referenced
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                <p>Research conducted by Dheeraj Vishwakarma, Keshar Agarwal, Swaradny Pulekar, Yash Tiwari &amp; Sourajeet Sahoo</p>
+                <p class="mt-2">Evidence-based carbon reduction framework for technology companies</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+        
+        // Navbar background on scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "Carbon Footprint Reduction Dashboard",
+  "short_name": "Carbon Dashboard",
+  "description": "Evidence-Based Carbon Footprint Reduction Measures for Tech Companies - Interactive Dashboard",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#10b981",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

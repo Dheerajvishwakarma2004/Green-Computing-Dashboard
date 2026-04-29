@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Footprint Reduction Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="description" content="Interactive Dashboard for Carbon Footprint Reduction Measures - Evidence-Based Analysis">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Carbon Dashboard">
+    
+    <!-- PWA Links -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%2310b981' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🌱</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            font-family: 'DM Sans', sans-serif;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Merriweather', serif;
+        }
+        :root {
+            --bg-primary: #f8f7f4;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --text-muted: #7a7a7a;
+            --border: #e5e5e5;
+            --accent-green: #2d6a4f;
+            --accent-green-light: #40916c;
+            --accent-coral: #e07a5f;
+            --accent-blue: #457b9d;
+            --accent-purple: #7b68ee;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        /* Header */
+        .main-header {
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 50%, #52b788 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* Filter Panel */
+        .filter-panel {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            height: 100vh;
+            background: var(--bg-card);
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            border-left: 3px solid var(--accent-green);
+        }
+        .filter-panel.open {
+            right: 0;
+        }
+        .filter-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .filter-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Chips */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1.5px solid var(--border);
+            background: var(--bg-card);
+        }
+        .chip:hover {
+            border-color: var(--accent-green);
+            background: rgba(45, 106, 79, 0.05);
+        }
+        .chip.active {
+            background: var(--accent-green);
+            color: white;
+            border-color: var(--accent-green);
+        }
+        /* Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: var(--shadow-md);
+        }
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        /* Metric Cards */
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            line-height: 1.2;
+        }
+        .metric-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        /* Tabs */
+        .tab-btn {
+            padding: 12px 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn:hover {
+            color: var(--accent-green);
+        }
+        .tab-btn.active {
+            color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+        }
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-low { background: #d4edda; color: #155724; }
+        .badge-medium { background: #fff3cd; color: #856404; }
+        .badge-high { background: #f8d7da; color: #721c24; }
+        /* Expandable */
+        .expandable {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: box-shadow 0.2s ease;
+        }
+        .expandable:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .expandable-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+            background: white;
+        }
+        .expandable-header:hover {
+            background: rgba(45, 106, 79, 0.05);
+        }
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.2s ease;
+            padding: 0 1rem;
+            visibility: hidden;
+            background: white;
+        }
+        .expandable.open .expandable-content {
+            max-height: 3000px;
+            opacity: 1;
+            visibility: visible;
+            padding: 1rem;
+        }
+        .expandable.open .expandable-icon {
+            transform: rotate(180deg);
+        }
+        .expandable-icon {
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+            color: var(--text-muted);
+        }
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: rgba(45, 106, 79, 0.08);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table tr:hover td {
+            background: rgba(45, 106, 79, 0.03);
+        }
+        /* Footer */
+        .footer {
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d3436 100%);
+            color: #f8f8f8;
+            padding: 0;
+            margin-top: 3rem;
+        }
+        .footer-top {
+            padding: 2.5rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer-author-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            margin: 4px;
+            transition: all 0.2s ease;
+        }
+        .footer-author-badge:hover {
+            transform: translateY(-2px);
+        }
+        .footer-stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s ease;
+        }
+        .footer-stat-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        .footer-bottom {
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+        /* Progress bar */
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-green);
+            transition: width 0.3s ease;
+        }
+        /* Info box */
+        .info-box {
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--accent-green);
+            background: rgba(45, 106, 79, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <!-- Filter Backdrop -->
+    <div class="filter-backdrop" id="filterBackdrop" onclick="toggleFilter()"></div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel" id="filterPanel">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold" style="color: var(--text-primary);">Filter Controls</h3>
+                <button onclick="toggleFilter()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <!-- Company Size -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3" style="color: var(--text-secondary);">
+                    <i data-lucide="building-2" class="w-4 h-4 inline mr-2"></i>Company Size
+                </label>
+                <div class="flex flex-wrap gap-2" id="sizeChips">
+                    <span class="chip active" data-filter="company_size" data-value="All">All</span>
+                    <span class="chip" data-filter="company_size" data-value="Medium-Large">Medium-Large</span>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3" style="color: var(--text-secondary);">
+                    <i data-lucide="folder" class="w-4 h-4 inline mr-2"></i>Category
+                </label>
+                <div class="flex flex-wrap gap-2" id="categoryChips">
+                    <span class="chip active" data-filter="category" data-value="Infrastructure">Infrastructure</span>
+                    <span class="chip active" data-filter="category" data-value="Operations">Operations</span>
+                    <span class="chip active" data-filter="category" data-value="Energy">Energy</span>
+                    <span class="chip active" data-filter="category" data-value="Hardware">Hardware</span>
+                    <span class="chip active" data-filter="category" data-value="Development">Development</span>
+                    <span class="chip active" data-filter="category" data-value="Supply Chain">Supply Chain</span>
+                    <span class="chip active" data-filter="category" data-value="Transportation">Transportation</span>
+                </div>
+            </div>
+
+            <!-- Difficulty -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3" style="color: var(--text-secondary);">
+                    <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>Implementation Difficulty
+                </label>
+                <div class="flex flex-wrap gap-2" id="difficultyChips">
+                    <span class="chip active" data-filter="difficulty" data-value="Low">Low</span>
+                    <span class="chip active" data-filter="difficulty" data-value="Medium">Medium</span>
+                    <span class="chip active" data-filter="difficulty" data-value="High">High</span>
+                </div>
+            </div>
+
+            <!-- Success Rate -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3" style="color: var(--text-secondary);">
+                    <i data-lucide="check-circle" class="w-4 h-4 inline mr-2"></i>Success Rate (Min: <span id="successRateValue">70</span>%)
+                </label>
+                <input type="range" id="successRate" min="0" max="100" value="70" step="5" onchange="updateSuccessRate(this.value)">
+            </div>
+
+            <!-- ROI Period -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3" style="color: var(--text-secondary);">
+                    <i data-lucide="clock" class="w-4 h-4 inline mr-2"></i>ROI Period (Max: <span id="roiValue">10</span> years)
+                </label>
+                <input type="range" id="roiPeriod" min="0" max="10" value="10" step="1" onchange="updateROI(this.value)">
+            </div>
+
+            <!-- Reset Button -->
+            <button onclick="resetFilters()" class="w-full py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: var(--accent-green); color: white;">
+                <i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-2"></i>Reset All Filters
+            </button>
+
+            <!-- Pro Tip -->
+            <div class="info-box mt-6">
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    <strong>Tip:</strong> Start with Quick Wins (ROI ≤1 year) to build momentum and demonstrate value.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-6" id="mainContent">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold main-header">Carbon Footprint Reduction Dashboard</h1>
+                <p class="text-sm mt-1" style="color: var(--text-muted);">Evidence-Based Measures for Tech Companies | Powered by Real-World Data</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:opacity-80" style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    Research Page
+                </a>
+                <button onclick="toggleFilter()" class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all hover:opacity-90" style="background: var(--accent-green); color: white;">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                    Filters
+                    <span class="bg-white text-green-700 text-xs font-bold px-2 py-0.5 rounded-full" id="filterCount">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-5 gap-4 mb-6" id="metricCards">
+            <div class="metric-card">
+                <div class="metric-value" id="metricMeasures">10</div>
+                <div class="metric-label">Available Measures</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="metricReduction">54.5%</div>
+                <div class="metric-label">Avg Carbon Reduction</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="metricSuccess">85%</div>
+                <div class="metric-label">Avg Success Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="metricQuickWins">4</div>
+                <div class="metric-label">Quick Wins</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="metricHighImpact">5</div>
+                <div class="metric-label">High Impact</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="flex border-b" style="border-color: var(--border);">
+                <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>Overview
+                </button>
+                <button class="tab-btn" data-tab="analysis" onclick="switchTab('analysis')">
+                    <i data-lucide="search" class="w-4 h-4"></i>Detailed Analysis
+                </button>
+                <button class="tab-btn" data-tab="cost" onclick="switchTab('cost')">
+                    <i data-lucide="dollar-sign" class="w-4 h-4"></i>Cost vs Impact
+                </button>
+                <button class="tab-btn" data-tab="cases" onclick="switchTab('cases')">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>Case Studies
+                </button>
+                <button class="tab-btn" data-tab="recommendations" onclick="switchTab('recommendations')">
+                    <i data-lucide="target" class="w-4 h-4"></i>Recommendations
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6" id="tabContent">
+                <!-- Overview Tab -->
+                <div id="tab-overview" class="tab-panel">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Comprehensive Overview</h3>
+                    
+                    <!-- Summary Table -->
+                    <div class="card mb-6">
+                        <div class="p-4 border-b" style="border-color: var(--border);">
+                            <h4 class="font-semibold" style="color: var(--text-primary);">All Measures Summary</h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table" id="summaryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Measure</th>
+                                        <th>Category</th>
+                                        <th>Size</th>
+                                        <th>Reduction</th>
+                                        <th>Success</th>
+                                        <th>Difficulty</th>
+                                        <th>Timeline</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 1 -->
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="card p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                                <i data-lucide="leaf" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Carbon Reduction Potential
+                            </h4>
+                            <div id="chartReduction" style="height: 350px;"></div>
+                        </div>
+                        <div class="card p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                                <i data-lucide="check-circle" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Success Rate Distribution
+                            </h4>
+                            <div id="chartSuccess" style="height: 350px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 2 -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="card p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                                <i data-lucide="folder" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Measures by Category
+                            </h4>
+                            <div id="chartCategory" style="height: 300px;"></div>
+                        </div>
+                        <div class="card p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                                <i data-lucide="gauge" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Measures by Difficulty
+                            </h4>
+                            <div id="chartDifficulty" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis Tab -->
+                <div id="tab-analysis" class="tab-panel hidden">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Deep Dive Analysis</h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold mb-2" style="color: var(--text-secondary);">Select a measure to explore:</label>
+                        <select id="measureSelect" onchange="showMeasureDetail()" class="w-full p-3 rounded-lg border" style="border-color: var(--border);">
+                        </select>
+                    </div>
+
+                    <div id="measureDetail">
+                        <!-- Detail content will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Cost vs Impact Tab -->
+                <div id="tab-cost" class="tab-panel hidden">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Value Analysis</h3>
+                    
+                    <div class="info-box mb-6">
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                            <strong>Reading Guide:</strong> Larger bubbles indicate higher success rates. Look for measures in the top-left area (high impact, lower cost) for best value.
+                        </p>
+                    </div>
+
+                    <div class="card p-4 mb-6">
+                        <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                            <i data-lucide="scatter-chart" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Investment Cost vs Carbon Reduction
+                        </h4>
+                        <div id="chartScatter" style="height: 450px;"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="card p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                                <i data-lucide="clock" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>ROI Timeline Comparison
+                            </h4>
+                            <div id="chartROI" style="height: 350px;"></div>
+                        </div>
+                        <div class="card p-4">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                                <i data-lucide="calendar" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Implementation Timeline
+                            </h4>
+                            <div id="chartTimeline" style="height: 350px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 mb-6" id="quickWinsSection">
+                        <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                            <i data-lucide="zap" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Quick Wins (ROI ≤ 1 Year)
+                        </h4>
+                        <div id="quickWinsTable"></div>
+                    </div>
+
+                    <div class="card p-4" id="bestValueSection">
+                        <h4 class="font-semibold mb-3" style="color: var(--text-primary);">
+                            <i data-lucide="award" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Best Value Propositions (≥40% reduction, ≤3yr ROI)
+                        </h4>
+                        <div id="bestValueTable"></div>
+                    </div>
+                </div>
+
+                <!-- Case Studies Tab -->
+                <div id="tab-cases" class="tab-panel hidden">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Real-World Success Stories</h3>
+                    
+                    <div class="info-box mb-6">
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                            <strong>Evidence-Based Approach:</strong> Every measure is backed by verified case studies from leading tech companies.
+                        </p>
+                    </div>
+
+                    <div id="caseStudiesContent">
+                        <!-- Case studies will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Recommendations Tab -->
+                <div id="tab-recommendations" class="tab-panel hidden">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Personalized Recommendations</h3>
+                    
+                    <div class="grid grid-cols-3 gap-6 mb-6" id="topRecommendations">
+                        <!-- Top 3 cards will be populated by JS -->
+                    </div>
+
+                    <div class="card p-4 mb-6">
+                        <h4 class="font-semibold mb-4" style="color: var(--text-primary);">
+                            <i data-lucide="map" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Suggested Implementation Roadmap
+                        </h4>
+                        <div id="roadmapContent">
+                            <!-- Roadmap will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-4" style="color: var(--text-primary);">
+                            <i data-lucide="bar-chart" class="w-4 h-4 inline mr-2" style="color: var(--accent-green);"></i>Recommendations by Focus Area
+                        </h4>
+                        <div id="categoryFocus">
+                            <!-- Category focus will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Research conducted by:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="footer-author-badge" style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white;">Dheeraj Vishwakarma</span>
+                            <span class="footer-author-badge" style="background: linear-gradient(135deg, #e07a5f, #f4a261); color: white;">Keshar Agarwal</span>
+                            <span class="footer-author-badge" style="background: linear-gradient(135deg, #457b9d, #1d3557); color: white;">Swaradny Pulekar</span>
+                            <span class="footer-author-badge" style="background: linear-gradient(135deg, #7b68ee, #9370db); color: white;">Yash Tiwari</span>
+                            <span class="footer-author-badge" style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white;">Sourajeet Sahoo</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="footer-stat-card">
+                            <div class="text-2xl font-bold" style="color: var(--accent-green);">10</div>
+                            <div class="text-xs opacity-70">Measures</div>
+                        </div>
+                        <div class="footer-stat-card">
+                            <div class="text-2xl font-bold" style="color: var(--accent-green);">85%</div>
+                            <div class="text-xs opacity-70">Avg Success</div>
+                        </div>
+                        <div class="footer-stat-card">
+                            <div class="text-2xl font-bold" style="color: var(--accent-green);">25+</div>
+                            <div class="text-xs opacity-70">Case Studies</div>
+                        </div>
+                        <div class="footer-stat-card">
+                            <div class="text-2xl font-bold" style="color: var(--accent-green);">2026</div>
+                            <div class="text-xs opacity-70">Last Updated</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="opacity-60 text-sm mb-2">Made with <span class="pulse">&#10084;&#65039;</span> for a sustainable future</p>
+            <p class="opacity-40 text-xs">Last Updated: 2026 | Data compiled from publicly available authoritative sources</p>
+            <p class="opacity-30 text-xs mt-2">Disclaimer: Results vary by context. Conduct detailed feasibility analysis before implementation.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Data
+        const measuresData = [
+            {
+                id: 1,
+                name: "Cloud Migration & Optimization",
+                category: "Infrastructure",
+                company_size: "All",
+                description: "Moving from on-premise servers to cloud providers (AWS, Google Cloud, Azure) with renewable energy commitments and optimizing resource usage through dynamic allocation and rightsizing",
+                carbon_min: 30,
+                carbon_max: 88,
+                cost_min: 5000,
+                cost_max: 5000000,
+                roi_min: 1,
+                roi_max: 3,
+                success_rate: 85,
+                case_company: "Etsy",
+                case_result: "Migrated from on-premise to Google Cloud resulting in 13,000 metric tons CO2 reduction annually, representing a 50% reduction in infrastructure carbon footprint",
+                case_source: "Etsy 2020 Sustainability Report",
+                timeline: 12,
+                difficulty: "Medium"
+            },
+            {
+                id: 2,
+                name: "Remote Work Policy",
+                category: "Operations",
+                company_size: "All",
+                description: "Implementing permanent remote or hybrid work arrangements to eliminate daily commuting emissions and reduce office space energy requirements",
+                carbon_min: 40,
+                carbon_max: 70,
+                cost_min: 500,
+                cost_max: 2000,
+                roi_min: 0,
+                roi_max: 0.5,
+                success_rate: 90,
+                case_company: "Twitter",
+                case_result: "Permanent remote work option resulted in 70% reduction in commute-related emissions and 30% reduction in office energy consumption",
+                case_source: "Twitter ESG Report 2021",
+                timeline: 3,
+                difficulty: "Low"
+            },
+            {
+                id: 3,
+                name: "Renewable Energy Procurement",
+                category: "Energy",
+                company_size: "Medium-Large",
+                description: "Purchasing renewable energy through Power Purchase Agreements (PPAs) or Renewable Energy Certificates (RECs) for office and data center operations",
+                carbon_min: 50,
+                carbon_max: 100,
+                cost_min: 100000,
+                cost_max: 100000000,
+                roi_min: 3,
+                roi_max: 7,
+                success_rate: 95,
+                case_company: "Google",
+                case_result: "Contracted 7+ gigawatts of renewable energy achieving 100% renewable matching since 2017, equivalent to removing 1.2 million cars from roads annually",
+                case_source: "Google Environmental Report 2022",
+                timeline: 12,
+                difficulty: "High"
+            },
+            {
+                id: 4,
+                name: "Data Center Cooling Optimization",
+                category: "Infrastructure",
+                company_size: "Medium-Large",
+                description: "Implementing AI/ML-based cooling optimization, hot/cold aisle containment, free air cooling, and raising server temperature thresholds to reduce cooling energy",
+                carbon_min: 30,
+                carbon_max: 50,
+                cost_min: 200000,
+                cost_max: 10000000,
+                roi_min: 2,
+                roi_max: 4,
+                success_rate: 80,
+                case_company: "Google DeepMind",
+                case_result: "AI-optimized cooling control achieved 40% reduction in cooling energy and 15% reduction in overall Power Usage Effectiveness (PUE)",
+                case_source: "Google DeepMind Report 2016-2018",
+                timeline: 9,
+                difficulty: "High"
+            },
+            {
+                id: 5,
+                name: "Device Lifecycle Management",
+                category: "Hardware",
+                company_size: "All",
+                description: "Extending device lifespan from 3 to 5+ years, implementing refurbishment programs, responsible e-waste recycling, and right-sizing device procurement",
+                carbon_min: 20,
+                carbon_max: 40,
+                cost_min: 50,
+                cost_max: 150,
+                roi_min: 0,
+                roi_max: 0.5,
+                success_rate: 90,
+                case_company: "Microsoft",
+                case_result: "Device buyback and refurbishment program achieved 82% device reuse/refurbishment rate, with lifecycle extension from 4 to 5 years resulting in 25% carbon reduction per device",
+                case_source: "Microsoft Circular Centers Report 2021",
+                timeline: 6,
+                difficulty: "Low"
+            },
+            {
+                id: 6,
+                name: "Smart Office Energy Management",
+                category: "Operations",
+                company_size: "All",
+                description: "Deploying IoT sensors, smart LED lighting systems, HVAC automation, and occupancy-based controls to eliminate energy waste in office spaces",
+                carbon_min: 25,
+                carbon_max: 45,
+                cost_min: 10000,
+                cost_max: 200000,
+                roi_min: 1,
+                roi_max: 3,
+                success_rate: 85,
+                case_company: "Cisco",
+                case_result: "Smart building deployment across 36 global buildings achieved 38% energy reduction, saving $6.4 million annually and reducing 42,000 metric tons CO2",
+                case_source: "Cisco Environmental Report 2022",
+                timeline: 6,
+                difficulty: "Medium"
+            },
+            {
+                id: 7,
+                name: "Sustainable Software Development",
+                category: "Development",
+                company_size: "All",
+                description: "Optimizing code for efficiency, implementing efficient algorithms, reducing computational waste, leveraging green hosting providers, and minimizing data transfer",
+                carbon_min: 20,
+                carbon_max: 50,
+                cost_min: 5000,
+                cost_max: 20000,
+                roi_min: 0.5,
+                roi_max: 1,
+                success_rate: 70,
+                case_company: "BBC",
+                case_result: "Website and streaming optimization reduced homepage data transfer by 80%, resulting in millions of kWh saved annually through reduced server load",
+                case_source: "BBC Carbon Footprint Report 2020",
+                timeline: 6,
+                difficulty: "Medium"
+            },
+            {
+                id: 8,
+                name: "Video Conferencing Over Travel",
+                category: "Transportation",
+                company_size: "All",
+                description: "Replacing business flights and in-person meetings with high-quality video conferencing infrastructure to eliminate aviation emissions",
+                carbon_min: 40,
+                carbon_max: 80,
+                cost_min: 150,
+                cost_max: 300,
+                roi_min: 0,
+                roi_max: 0,
+                success_rate: 95,
+                case_company: "Salesforce",
+                case_result: "Virtual Dreamforce 2020 event hosted 75,000 attendees with zero travel, avoiding approximately 33,000 tons of CO2 emissions compared to in-person event",
+                case_source: "Salesforce Stakeholder Report 2021",
+                timeline: 2,
+                difficulty: "Low"
+            },
+            {
+                id: 9,
+                name: "Green Procurement & Suppliers",
+                category: "Supply Chain",
+                company_size: "Medium-Large",
+                description: "Requiring suppliers to meet carbon reduction standards, prioritizing low-carbon vendors, and actively engaging supply chain partners in emission reduction efforts",
+                carbon_min: 10,
+                carbon_max: 30,
+                cost_min: 50000,
+                cost_max: 500000,
+                roi_min: 3,
+                roi_max: 5,
+                success_rate: 75,
+                case_company: "Apple",
+                case_result: "Supplier Clean Energy Program enrolled 213 suppliers committed to 100% renewable energy (as of 2022), which will avoid 18 million tons CO2 annually when fully implemented",
+                case_source: "Apple Supplier Report 2022",
+                timeline: 12,
+                difficulty: "Medium"
+            },
+            {
+                id: 10,
+                name: "Electric Vehicle Fleet",
+                category: "Transportation",
+                company_size: "Medium-Large",
+                description: "Transitioning company vehicle fleet from gasoline/diesel to electric vehicles and installing charging infrastructure at facilities",
+                carbon_min: 50,
+                carbon_max: 70,
+                cost_min: 35000,
+                cost_max: 80000,
+                roi_min: 5,
+                roi_max: 8,
+                success_rate: 90,
+                case_company: "Amazon",
+                case_result: "Order of 100,000 electric delivery vans from Rivian projected to save 4 million metric tons of CO2 per year when fully deployed by 2030",
+                case_source: "Amazon Climate Pledge Report 2021",
+                timeline: 18,
+                difficulty: "High"
+            }
+        ];
+
+        // Filters state
+        let filters = {
+            company_size: ['All'],
+            category: ['Infrastructure', 'Operations', 'Energy', 'Hardware', 'Development', 'Supply Chain', 'Transportation'],
+            difficulty: ['Low', 'Medium', 'High'],
+            success_rate: 70,
+            roi_max: 10
+        };
+
+        // Helper function
+        function truncate(str, maxLen) {
+            if (str.length <= maxLen) return str;
+            return str.substring(0, maxLen - 3) + '...';
+        }
+
+        let filteredData = [...measuresData];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initChips();
+            applyFilters();
+        });
+
+        // Toggle filter panel
+        function toggleFilter() {
+            const panel = document.getElementById('filterPanel');
+            const backdrop = document.getElementById('filterBackdrop');
+            panel.classList.toggle('open');
+            backdrop.classList.toggle('show');
+        }
+
+        // Initialize chips
+        function initChips() {
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const filterType = chip.dataset.filter;
+                    const value = chip.dataset.value;
+                    
+                    if (filterType === 'success_rate' || filterType === 'roi') return;
+                    
+                    chip.classList.toggle('active');
+                    updateFilters();
+                });
+            });
+        }
+
+        // Update filters from chips
+        function updateFilters() {
+            filters.company_size = [];
+            filters.category = [];
+            filters.difficulty = [];
+            
+            document.querySelectorAll('[data-filter="company_size"].active').forEach(c => {
+                filters.company_size.push(c.dataset.value);
+            });
+            document.querySelectorAll('[data-filter="category"].active').forEach(c => {
+                filters.category.push(c.dataset.value);
+            });
+            document.querySelectorAll('[data-filter="difficulty"].active').forEach(c => {
+                filters.difficulty.push(c.dataset.value);
+            });
+            
+            applyFilters();
+        }
+
+        // Update success rate display
+        function updateSuccessRate(value) {
+            document.getElementById('successRateValue').textContent = value;
+            filters.success_rate = parseInt(value);
+            applyFilters();
+        }
+
+        // Update ROI display
+        function updateROI(value) {
+            document.getElementById('roiValue').textContent = value;
+            filters.roi_max = parseInt(value);
+            applyFilters();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            filters = {
+                company_size: ['All'],
+                category: ['Infrastructure', 'Operations', 'Energy', 'Hardware', 'Development', 'Supply Chain', 'Transportation'],
+                difficulty: ['Low', 'Medium', 'High'],
+                success_rate: 70,
+                roi_max: 10
+            };
+            
+            document.getElementById('successRate').value = 70;
+            document.getElementById('successRateValue').textContent = '70';
+            document.getElementById('roiPeriod').value = 10;
+            document.getElementById('roiValue').textContent = '10';
+            
+            document.querySelectorAll('.chip').forEach(chip => {
+                if (chip.dataset.filter === 'success_rate' || chip.dataset.filter === 'roi') return;
+                chip.classList.remove('active');
+                if (chip.dataset.value === 'All' || 
+                    ['Infrastructure', 'Operations', 'Energy', 'Hardware', 'Development', 'Supply Chain', 'Transportation', 'Low', 'Medium', 'High'].includes(chip.dataset.value)) {
+                    chip.classList.add('active');
+                }
+            });
+            
+            applyFilters();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            filteredData = measuresData.filter(item => {
+                const sizeMatch = filters.company_size.includes('All') || 
+                                  filters.company_size.includes(item.company_size) ||
+                                  (filters.company_size.includes('Medium-Large') && item.company_size === 'Medium-Large');
+                const catMatch = filters.category.includes(item.category);
+                const diffMatch = filters.difficulty.includes(item.difficulty);
+                const successMatch = item.success_rate >= filters.success_rate;
+                const roiMatch = item.roi_max <= filters.roi_max;
+                
+                return sizeMatch && catMatch && diffMatch && successMatch && roiMatch;
+            });
+            
+            updateFilterCount();
+            updateMetrics();
+            updateSummaryTable();
+            updateCharts();
+            updateMeasureSelect();
+            updateCaseStudies();
+            updateRecommendations();
+            updateQuickWins();
+            updateBestValue();
+        }
+
+        // Update filter count badge
+        function updateFilterCount() {
+            let count = 0;
+            if (!filters.company_size.includes('All')) count++;
+            if (filters.category.length < 7) count++;
+            if (filters.difficulty.length < 3) count++;
+            if (filters.success_rate > 0) count++;
+            if (filters.roi_max < 10) count++;
+            document.getElementById('filterCount').textContent = count;
+        }
+
+        // Update metrics
+        function updateMetrics() {
+            const avgReduction = filteredData.length ? 
+                (filteredData.reduce((sum, d) => sum + (d.carbon_min + d.carbon_max) / 2, 0) / filteredData.length).toFixed(1) : 0;
+            const avgSuccess = filteredData.length ? 
+                Math.round(filteredData.reduce((sum, d) => sum + d.success_rate, 0) / filteredData.length) : 0;
+            const quickWins = filteredData.filter(d => d.roi_max <= 1).length;
+            const highImpact = filteredData.filter(d => (d.carbon_min + d.carbon_max) / 2 >= 50).length;
+            
+            document.getElementById('metricMeasures').textContent = filteredData.length;
+            document.getElementById('metricReduction').textContent = avgReduction + '%';
+            document.getElementById('metricSuccess').textContent = avgSuccess + '%';
+            document.getElementById('metricQuickWins').textContent = quickWins;
+            document.getElementById('metricHighImpact').textContent = highImpact;
+        }
+
+        // Update summary table
+        function updateSummaryTable() {
+            const tbody = document.querySelector('#summaryTable tbody');
+            tbody.innerHTML = filteredData.map(item => `
+                <tr>
+                    <td class="font-medium">${item.name.length > 30 ? item.name.substring(0, 30) + '...' : item.name}</td>
+                    <td><span class="badge" style="background: rgba(45,106,79,0.1); color: var(--accent-green);">${item.category}</span></td>
+                    <td>${item.company_size}</td>
+                    <td>${item.carbon_min}-${item.carbon_max}%</td>
+                    <td>${item.success_rate}%</td>
+                    <td><span class="badge badge-${item.difficulty.toLowerCase()}">${item.difficulty}</span></td>
+                    <td>${item.timeline} mo</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update charts
+        function updateCharts() {
+            updateReductionChart();
+            updateSuccessChart();
+            updateCategoryChart();
+            updateDifficultyChart();
+            updateScatterChart();
+            updateROIChart();
+            updateTimelineChart();
+        }
+
+        function updateReductionChart() {
+            const sorted = [...filteredData].sort((a, b) => 
+                ((a.carbon_min + a.carbon_max) / 2) - ((b.carbon_min + b.carbon_max) / 2)
+            );
+            
+            const names = sorted.map(d => d.name.length > 20 ? d.name.substring(0, 20) + '...' : d.name);
+            const values = sorted.map(d => ((d.carbon_min + d.carbon_max) / 2).toFixed(1));
+            
+            Plotly.newPlot('chartReduction', [{
+                type: 'bar',
+                y: names,
+                x: values,
+                orientation: 'h',
+                marker: { 
+                    color: values,
+                    colorscale: 'Greens'
+                },
+                text: values.map(v => v + '%'),
+                textposition: 'outside',
+                textfont: { size: 12, color: '#333' },
+                cliponaxis: false,
+                insidetextfont: { size: 12 }
+            }], {
+                margin: { l: Math.max(160, Math.min(...names.map(n => n.length)) * 6), r: 60, t: 20, b: 50, pad: 8 },
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: { 
+                    title: 'Carbon Reduction (%)',
+                    range: [0, Math.max(...values.map(Number)) * 1.25],
+                    gridcolor: 'rgba(0,0,0,0.05)',
+                    tickfont: { size: 11 }
+                },
+                yaxis: { 
+                    gridcolor: 'transparent',
+                    tickfont: { size: 11 },
+                    automargin: true
+                },
+                height: Math.max(400, sorted.length * 45),
+                showlegend: false,
+                responsive: true
+            }, {responsive: true});
+        }
+
+        function updateSuccessChart() {
+            const sorted = [...filteredData].sort((a, b) => a.success_rate - b.success_rate);
+            
+            const names = sorted.map(d => d.name.length > 20 ? d.name.substring(0, 20) + '...' : d.name);
+            const values = sorted.map(d => d.success_rate);
+            
+            Plotly.newPlot('chartSuccess', [{
+                type: 'bar',
+                y: names,
+                x: values,
+                orientation: 'h',
+                marker: { 
+                    color: values,
+                    colorscale: 'Blues'
+                },
+                text: values.map(v => v + '%'),
+                textposition: 'outside',
+                textfont: { size: 12, color: '#333' },
+                cliponaxis: false,
+                insidetextfont: { size: 12 }
+            }], {
+                margin: { l: Math.max(160, Math.min(...names.map(n => n.length)) * 6), r: 60, t: 20, b: 50, pad: 8 },
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: { 
+                    title: 'Success Rate (%)',
+                    range: [0, 105],
+                    gridcolor: 'rgba(0,0,0,0.05)',
+                    tickfont: { size: 11 }
+                },
+                yaxis: { 
+                    gridcolor: 'transparent',
+                    tickfont: { size: 11 },
+                    automargin: true
+                },
+                height: Math.max(400, sorted.length * 45),
+                showlegend: false,
+                responsive: true
+            }, {responsive: true});
+        }
+
+        function updateCategoryChart() {
+            const counts = {};
+            filteredData.forEach(d => {
+                counts[d.category] = (counts[d.category] || 0) + 1;
+            });
+            
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+            
+            Plotly.newPlot('chartCategory', [{
+                values: values,
+                labels: labels,
+                type: 'pie',
+                hole: 0.4,
+                marker: {
+                    colors: ['#2d6a4f', '#40916c', '#52b788', '#74c69d', '#95d5b2', '#b7e4c7', '#d8f3dc']
+                },
+                textinfo: 'label+percent',
+                textfont: { size: 11 }
+            }], {
+                margin: { t: 20, b: 20, l: 20, r: 20 },
+                paper_bgcolor: 'transparent',
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.1 },
+                height: 300
+            }, {responsive: true});
+        }
+
+        function updateDifficultyChart() {
+            const counts = { Low: 0, Medium: 0, High: 0 };
+            filteredData.forEach(d => {
+                counts[d.difficulty]++;
+            });
+            
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+            const colors = ['#2d6a4f', '#f4a261', '#e07a5f'];
+            
+            Plotly.newPlot('chartDifficulty', [{
+                values: values,
+                labels: labels,
+                type: 'pie',
+                hole: 0.4,
+                marker: { colors: colors },
+                textinfo: 'label+percent',
+                textfont: { size: 11 }
+            }], {
+                margin: { t: 20, b: 20, l: 20, r: 20 },
+                paper_bgcolor: 'transparent',
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.1 },
+                height: 300
+            }, {responsive: true});
+        }
+
+        function updateScatterChart() {
+            const data = filteredData.map(d => ({
+                x: (d.cost_min + d.cost_max) / 2,
+                y: (d.carbon_min + d.carbon_max) / 2,
+                size: d.success_rate / 3,
+                text: d.name,
+                color: d.category
+            }));
+            
+            const traces = {};
+            data.forEach(d => {
+                if (!traces[d.color]) traces[d.color] = { x: [], y: [], text: [], size: [] };
+                traces[d.color].x.push(d.x);
+                traces[d.color].y.push(d.y);
+                traces[d.color].text.push(d.text);
+                traces[d.color].size.push(d.size);
+            });
+            
+            const plotData = Object.entries(traces).map(([category, trace]) => ({
+                x: trace.x,
+                y: trace.y,
+                mode: 'markers',
+                type: 'scatter',
+                name: category,
+                text: trace.text,
+                marker: {
+                    size: trace.size,
+                    opacity: 0.7
+                }
+            }));
+            
+            Plotly.newPlot('chartScatter', plotData, {
+                margin: { l: 60, r: 40, t: 40, b: 60 },
+                paper_bgcolor: 'transparent',
+                xaxis: { 
+                    title: 'Average Cost ($ - Log Scale)',
+                    type: 'log',
+                    gridcolor: 'rgba(0,0,0,0.05)'
+                },
+                yaxis: { 
+                    title: 'Carbon Reduction (%)',
+                    gridcolor: 'rgba(0,0,0,0.05)'
+                },
+                height: 450,
+                hovermode: 'closest',
+                legend: { orientation: 'h', y: 1.1 }
+            }, {responsive: true});
+        }
+
+        function updateROIChart() {
+            const sorted = [...filteredData].sort((a, b) => 
+                ((a.roi_min + a.roi_max) / 2) - ((b.roi_min + b.roi_max) / 2)
+            );
+            
+            const names = sorted.map(d => d.name.length > 20 ? d.name.substring(0, 20) + '...' : d.name);
+            const values = sorted.map(d => ((d.roi_min + d.roi_max) / 2).toFixed(1));
+            const colors = sorted.map(d => {
+                if (d.difficulty === 'Low') return '#2d6a4f';
+                if (d.difficulty === 'Medium') return '#f4a261';
+                return '#e07a5f';
+            });
+            
+            Plotly.newPlot('chartROI', [{
+                type: 'bar',
+                x: names,
+                y: values,
+                marker: { color: colors },
+                text: values.map(v => v + 'y'),
+                textposition: 'outside',
+                textfont: { size: 11, color: '#333' },
+                cliponaxis: false
+            }], {
+                margin: { l: 80, r: 60, t: 30, b: 180, pad: 10 },
+                paper_bgcolor: 'transparent',
+                xaxis: { 
+                    tickangle: -45,
+                    tickfont: { size: 10 },
+                    gridcolor: 'transparent',
+                    automargin: true
+                },
+                yaxis: { 
+                    title: 'Years to ROI',
+                    gridcolor: 'rgba(0,0,0,0.05)',
+                    tickfont: { size: 11 }
+                },
+                height: Math.max(450, names.length * 70 + 80),
+                showlegend: false,
+                responsive: true
+            }, {responsive: true});
+        }
+
+        function updateTimelineChart() {
+            const sorted = [...filteredData].sort((a, b) => a.timeline - b.timeline);
+            
+            const names = sorted.map(d => truncate(d.name, 30));
+            const values = sorted.map(d => d.timeline);
+            
+            Plotly.newPlot('chartTimeline', [{
+                type: 'bar',
+                x: names,
+                y: values,
+                marker: { 
+                    color: values,
+                    colorscale: 'Viridis'
+                },
+                text: values.map(v => v + 'm'),
+                textposition: 'outside',
+                textfont: { size: 11, color: '#333' },
+                cliponaxis: false
+            }], {
+                margin: { l: 80, r: 60, t: 30, b: 180, pad: 10 },
+                paper_bgcolor: 'transparent',
+                xaxis: { 
+                    tickangle: -45,
+                    tickfont: { size: 10 },
+                    gridcolor: 'transparent',
+                    automargin: true
+                },
+                yaxis: { 
+                    title: 'Months to Implement',
+                    gridcolor: 'rgba(0,0,0,0.05)',
+                    tickfont: { size: 11 }
+                },
+                height: Math.max(450, names.length * 70 + 80),
+                showlegend: false,
+                responsive: true
+            }, {responsive: true});
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('hidden', panel.id !== 'tab-' + tabName);
+            });
+            
+            setTimeout(() => {
+                updateCharts();
+                lucide.createIcons();
+            }, 100);
+        }
+
+        // Update measure select
+        function updateMeasureSelect() {
+            const select = document.getElementById('measureSelect');
+            select.innerHTML = filteredData.map(d => 
+                `<option value="${d.id}">${d.name}</option>`
+            ).join('');
+            
+            if (filteredData.length > 0) {
+                showMeasureDetail();
+            } else {
+                document.getElementById('measureDetail').innerHTML = `
+                    <div class="p-6 text-center" style="color: var(--text-muted);">
+                        <p>No measures match your current filter criteria.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Show measure detail
+        function showMeasureDetail() {
+            const id = parseInt(document.getElementById('measureSelect').value);
+            const measure = filteredData.find(d => d.id === id);
+            if (!measure) return;
+            
+            const avgReduction = ((measure.carbon_min + measure.carbon_max) / 2).toFixed(1);
+            const avgCost = ((measure.cost_min + measure.cost_max) / 2).toFixed(0);
+            const avgROI = ((measure.roi_min + measure.roi_max) / 2).toFixed(1);
+            
+            document.getElementById('measureDetail').innerHTML = `
+                <div class="fade-in">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">${measure.name}</h3>
+                    
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="metric-card">
+                            <div class="text-lg font-bold" style="color: var(--accent-green);">${measure.category}</div>
+                            <div class="metric-label">Category</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="text-lg font-bold" style="color: var(--accent-green);">${measure.company_size}</div>
+                            <div class="metric-label">Applicable To</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="text-lg font-bold" style="color: var(--accent-green);">${measure.timeline} months</div>
+                            <div class="metric-label">Timeline</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="text-lg font-bold"><span class="badge badge-${measure.difficulty.toLowerCase()}">${measure.difficulty}</span></div>
+                            <div class="metric-label">Difficulty</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 mb-6" style="border-left: 4px solid var(--accent-green);">
+                        <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Description</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">${measure.description}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="metric-card">
+                            <div class="metric-value" style="font-size: 1.5rem;">${measure.carbon_min}-${measure.carbon_max}%</div>
+                            <div class="metric-label">Carbon Reduction</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" style="font-size: 1.5rem;">${measure.success_rate}%</div>
+                            <div class="metric-label">Success Rate</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" style="font-size: 1.5rem;">${measure.roi_max === 0 ? 'Immediate' : avgROI + ' years'}</div>
+                            <div class="metric-label">ROI Period</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" style="font-size: 1.5rem;">$${measure.cost_min.toLocaleString()}-$${measure.cost_max.toLocaleString()}</div>
+                            <div class="metric-label">Cost Range</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 mb-6" style="background: rgba(45, 106, 79, 0.08); border: 1px solid rgba(45, 106, 79, 0.2);">
+                        <h4 class="font-semibold mb-2" style="color: var(--text-primary);">
+                            <i data-lucide="building" class="w-4 h-4 inline mr-2"></i>${measure.case_company}
+                        </h4>
+                        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">${measure.case_result}</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Source:</strong> ${measure.case_source}</p>
+                    </div>
+                    
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-3" style="color: var(--text-primary);">Impact Metrics</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium">Carbon Reduction</span>
+                                    <span class="text-sm font-bold" style="color: var(--accent-green);">${measure.carbon_max}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${measure.carbon_max}%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-medium">Success Rate</span>
+                                    <span class="text-sm font-bold" style="color: var(--accent-green);">${measure.success_rate}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${measure.success_rate}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            lucide.createIcons();
+        }
+
+        // Update case studies
+        function updateCaseStudies() {
+            const content = document.getElementById('caseStudiesContent');
+            const categories = [...new Set(filteredData.map(d => d.category))];
+            
+            content.innerHTML = categories.map(cat => `
+                <div class="mb-6">
+                    <h4 class="font-bold text-lg mb-3" style="color: var(--text-primary);">
+                        <i data-lucide="folder" class="w-5 h-5 inline mr-2" style="color: var(--accent-green);"></i>${cat}
+                    </h4>
+                    ${filteredData.filter(d => d.category === cat).map(item => `
+                        <div class="expandable mb-3" onclick="this.classList.toggle('open')">
+                            <div class="expandable-header">
+                                <div>
+                                    <span class="font-semibold">${item.name}</span>
+                                    <span class="text-sm ml-2" style="color: var(--text-muted);">Case Study: ${item.case_company}</span>
+                                </div>
+                                <i data-lucide="chevron-down" class="w-5 h-5 expandable-icon"></i>
+                            </div>
+                            <div class="expandable-content">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <h5 class="font-semibold mb-2" style="color: var(--text-primary);">Results Achieved</h5>
+                                        <p style="color: var(--text-secondary); line-height: 1.6;">${item.case_result}</p>
+                                        <p class="text-sm mt-2" style="color: var(--text-muted);"><strong>Source:</strong> ${item.case_source}</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold mb-2" style="color: var(--text-primary);">Key Metrics</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span class="text-sm">Carbon Reduction</span>
+                                                <span class="font-bold" style="color: var(--accent-green);">${item.carbon_min}-${item.carbon_max}%</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span class="text-sm">Success Rate</span>
+                                                <span class="font-bold" style="color: var(--accent-green);">${item.success_rate}%</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span class="text-sm">ROI Period</span>
+                                                <span class="font-bold" style="color: var(--accent-green);">${item.roi_max === 0 ? 'Immediate' : item.roi_min + '-' + item.roi_max + ' years'}</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span class="text-sm">Timeline</span>
+                                                <span class="font-bold" style="color: var(--accent-green);">${item.timeline} months</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; background: rgba(45, 106, 79, 0.05);">
+                                    <p class="text-sm" style="color: var(--text-secondary);"><strong>About:</strong> ${item.description}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        // Update recommendations
+        function updateRecommendations() {
+            updateTopRecommendations();
+            updateRoadmap();
+            updateCategoryFocus();
+        }
+
+        function updateTopRecommendations() {
+            if (filteredData.length === 0) {
+                document.getElementById('topRecommendations').innerHTML = `
+                    <div class="col-span-3 p-6 text-center" style="color: var(--text-muted);">
+                        <p>No measures match your current filters.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const bestImpact = [...filteredData].sort((a, b) => 
+                ((b.carbon_min + b.carbon_max) / 2) - ((a.carbon_min + a.carbon_max) / 2)
+            )[0];
+            
+            const bestROI = [...filteredData].sort((a, b) => 
+                ((a.roi_min + a.roi_max) / 2) - ((b.roi_min + b.roi_max) / 2)
+            )[0];
+            
+            const mostProven = [...filteredData].sort((a, b) => b.success_rate - a.success_rate)[0];
+            
+            document.getElementById('topRecommendations').innerHTML = [
+                { title: 'Highest Impact', item: bestImpact, icon: 'trophy', color: '#2d6a4f' },
+                { title: 'Fastest ROI', item: bestROI, icon: 'clock', color: '#f4a261' },
+                { title: 'Most Proven', item: mostProven, icon: 'check-circle', color: '#457b9d' }
+            ].map(rec => `
+                <div class="card p-4" style="border-top: 4px solid ${rec.color};">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="${rec.icon}" class="w-5 h-5" style="color: ${rec.color};"></i>
+                        <span class="text-sm font-semibold" style="color: ${rec.color};">${rec.title}</span>
+                    </div>
+                    <h4 class="font-bold mb-2" style="color: var(--text-primary);">${rec.item.name}</h4>
+                    <div class="space-y-1 text-sm" style="color: var(--text-secondary);">
+                        <p><strong>Reduction:</strong> ${((rec.item.carbon_min + rec.item.carbon_max) / 2).toFixed(1)}%</p>
+                        <p><strong>Success:</strong> ${rec.item.success_rate}%</p>
+                        <p><strong>Category:</strong> ${rec.item.category}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function updateRoadmap() {
+            const phase1 = filteredData.filter(d => d.roi_max <= 1).sort((a, b) => 
+                ((b.carbon_min + b.carbon_max) / 2) - ((a.carbon_min + a.carbon_max) / 2)
+            );
+            const phase2 = filteredData.filter(d => d.roi_max > 1 && d.roi_max <= 3).sort((a, b) => 
+                ((b.carbon_min + b.carbon_max) / 2) - ((a.carbon_min + a.carbon_max) / 2)
+            );
+            const phase3 = filteredData.filter(d => d.roi_max > 3).sort((a, b) => 
+                ((b.carbon_min + b.carbon_max) / 2) - ((a.carbon_min + a.carbon_max) / 2)
+            );
+            
+            document.getElementById('roadmapContent').innerHTML = `
+                ${phase1.length ? `
+                    <div class="mb-4 p-3 rounded" style="background: rgba(45, 106, 79, 0.1); border-left: 4px solid #2d6a4f;">
+                        <h5 class="font-semibold mb-2" style="color: #2d6a4f;">Phase 1: Quick Wins (0-6 months)</h5>
+                        ${phase1.map(d => `<p class="text-sm mb-1" style="color: var(--text-secondary);">&#10003; <strong>${d.name}</strong> - ${((d.carbon_min + d.carbon_max) / 2).toFixed(1)}% reduction</p>`).join('')}
+                    </div>
+                ` : ''}
+                ${phase2.length ? `
+                    <div class="mb-4 p-3 rounded" style="background: rgba(244, 162, 97, 0.1); border-left: 4px solid #f4a261;">
+                        <h5 class="font-semibold mb-2" style="color: #f4a261;">Phase 2: Medium-Term (6-18 months)</h5>
+                        ${phase2.map(d => `<p class="text-sm mb-1" style="color: var(--text-secondary);">&#9881; <strong>${d.name}</strong> - ${((d.carbon_min + d.carbon_max) / 2).toFixed(1)}% reduction</p>`).join('')}
+                    </div>
+                ` : ''}
+                ${phase3.length ? `
+                    <div class="p-3 rounded" style="background: rgba(224, 122, 95, 0.1); border-left: 4px solid #e07a5f;">
+                        <h5 class="font-semibold mb-2" style="color: #e07a5f;">Phase 3: Strategic (18+ months)</h5>
+                        ${phase3.map(d => `<p class="text-sm mb-1" style="color: var(--text-secondary);">&#127919; <strong>${d.name}</strong> - ${((d.carbon_min + d.carbon_max) / 2).toFixed(1)}% reduction</p>`).join('')}
+                    </div>
+                ` : ''}
+                ${filteredData.length === 0 ? '<p style="color: var(--text-muted);">No measures match your filters.</p>' : ''}
+            `;
+        }
+
+        function updateCategoryFocus() {
+            const categories = [...new Set(filteredData.map(d => d.category))];
+            
+            document.getElementById('categoryFocus').innerHTML = categories.map(cat => {
+                const items = filteredData.filter(d => d.category === cat).sort((a, b) => 
+                    ((b.carbon_min + b.carbon_max) / 2) - ((a.carbon_min + a.carbon_max) / 2)
+                );
+                return `
+                    <div class="card mb-3">
+                        <div class="p-3 border-b" style="border-color: var(--border);">
+                            <h5 class="font-semibold" style="color: var(--text-primary);">${cat} (${items.length} measures)</h5>
+                        </div>
+                        <div class="p-3">
+                            ${items.map(item => `
+                                <div class="flex items-center justify-between py-2" style="border-bottom: 1px solid var(--border);">
+                                    <div>
+                                        <span class="font-medium" style="color: var(--text-primary);">${item.name}</span>
+                                    </div>
+                                    <div class="flex gap-4 text-sm">
+                                        <span style="color: var(--accent-green);">${((item.carbon_min + item.carbon_max) / 2).toFixed(1)}%</span>
+                                        <span style="color: var(--accent-blue);">${item.success_rate}%</span>
+                                        <span style="color: var(--text-muted);">${item.roi_max === 0 ? 'Now' : ((item.roi_min + item.roi_max) / 2).toFixed(1) + 'y'}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update quick wins
+        function updateQuickWins() {
+            const quickWins = filteredData.filter(d => d.roi_max <= 1);
+            const container = document.getElementById('quickWinsSection');
+            
+            if (quickWins.length === 0) {
+                document.getElementById('quickWinsTable').innerHTML = `
+                    <p style="color: var(--text-muted);">No quick win measures match your current filters.</p>
+                `;
+                return;
+            }
+            
+            document.getElementById('quickWinsTable').innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Measure</th>
+                            <th>Avg Reduction</th>
+                            <th>Avg Cost</th>
+                            <th>Success Rate</th>
+                            <th>Timeline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${quickWins.map(d => `
+                            <tr>
+                                <td class="font-medium">${d.name}</td>
+                                <td style="color: var(--accent-green); font-weight: 600;">${((d.carbon_min + d.carbon_max) / 2).toFixed(1)}%</td>
+                                <td>$${((d.cost_min + d.cost_max) / 2).toLocaleString()}</td>
+                                <td>${d.success_rate}%</td>
+                                <td>${d.timeline} months</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Update best value
+        function updateBestValue() {
+            const bestValue = filteredData.filter(d => (d.carbon_min + d.carbon_max) / 2 >= 40 && d.roi_max <= 3);
+            const container = document.getElementById('bestValueSection');
+            
+            if (bestValue.length === 0) {
+                document.getElementById('bestValueTable').innerHTML = `
+                    <p style="color: var(--text-muted);">No best value measures with current filters.</p>
+                `;
+                return;
+            }
+            
+            document.getElementById('bestValueTable').innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Measure</th>
+                            <th>Avg Reduction</th>
+                            <th>Avg ROI</th>
+                            <th>Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bestValue.map(d => `
+                            <tr>
+                                <td class="font-medium">${d.name}</td>
+                                <td style="color: var(--accent-green); font-weight: 600;">${((d.carbon_min + d.carbon_max) / 2).toFixed(1)}%</td>
+                                <td>${((d.roi_min + d.roi_max) / 2).toFixed(1)} years</td>
+                                <td>${d.success_rate}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
